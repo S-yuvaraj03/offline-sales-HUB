@@ -3,6 +3,7 @@ import '../db/db_helper.dart';
 import '../models/product_model.dart';
 import '../models/cart_item_model.dart';
 import '../models/category_model.dart';
+import 'package:flutter/services.dart';
 
 class ManualBillingPage extends StatefulWidget {
   const ManualBillingPage({super.key});
@@ -15,6 +16,8 @@ class _ManualBillingPageState extends State<ManualBillingPage> {
   List<Product> allProducts = [];
   List<Category> categories = [];
   List<CartItem> selectedItems = [];
+  static const MethodChannel _printerChannel =
+      MethodChannel('com.example.juice_shop/printer');
 
   Category? selectedCategory;
   Product? selectedProduct;
@@ -210,6 +213,7 @@ class _ManualBillingPageState extends State<ManualBillingPage> {
     }
 
     final double paymentAmount = total;
+    await printTotal(paymentAmount);
 
     setState(() => selectedItems.clear());
 
@@ -266,6 +270,25 @@ class _ManualBillingPageState extends State<ManualBillingPage> {
     await DBHelper().clearHeldItems();
 
     setState(() => selectedItems = resumedItems);
+  }
+
+  Future<void> printTotal(double total) async {
+    final text = "\x1B\x61\x01" // Center
+        "\x1B\x21\x10" // Bold
+        "JUICE SHOP\n\n"
+        "\x1B\x21\x00"
+        "TOTAL AMOUNT\n"
+        "\x1B\x21\x20"
+        "₹${total.toStringAsFixed(2)}\n\n\n";
+
+    try {
+      await _printerChannel.invokeMethod(
+        'printText',
+        {'text': text},
+      );
+    } catch (e) {
+      debugPrint("Print failed: $e");
+    }
   }
 
   @override

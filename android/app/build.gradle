@@ -37,7 +37,7 @@ android {
         applicationId "com.example.juice_shop"
 
         // ✅ Minimum supported Android version
-        minSdkVersion 21
+        minSdkVersion flutter.minSdkVersion
 
         // ✅ Target version — 31 is safe for WRITE_EXTERNAL_STORAGE
         targetSdkVersion 31
